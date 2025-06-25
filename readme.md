@@ -9,18 +9,18 @@ Tests are written using [Playwright](https://playwright.dev/python/) and `pytest
 They run across **Chromium**, **Firefox**, and **WebKit**
 
 ## Directory Structure
--- conftest.py 
--- tests/
-    -- test_alza.py # Tests for Alza.cz
-    --test_ikea.py # Tests for IKEA.cz
-    -- test_jysk.py # Tests for JYSK.cz
--- pages/
-    -- alza_page.py # Page Object Model for Alza
-    -- ikea_page.py # Page Object Model for IKEA
-    --  jysk_page.py # Page Object Model for JYSK
--- helpers/
-    -- helper_google_popup_decline.py # Handles Google sign-in popup
-    -- helper_captcha_skip.py # Skips test if CAPTCHA appears
+conftest.py
+tests/
+├── test_alza.py          
+├── test_ikea.py          
+└── test_jysk.py         
+pages/
+├── alza_page.py
+├── ikea_page.py          
+└── jysk_page.py          
+helpers/
+├── helper_google_popup_decline.py   
+└── helper_captcha_skip.py           
 
 ## Prerequisites
 
