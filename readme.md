@@ -9,18 +9,25 @@ Tests are written using [Playwright](https://playwright.dev/python/) and `pytest
 They run across **Chromium**, **Firefox**, and **WebKit**
 
 ## Directory Structure
-conftest.py
-tests/
-├── test_alza.py          
-├── test_ikea.py          
-└── test_jysk.py         
-pages/
-├── alza_page.py
-├── ikea_page.py          
-└── jysk_page.py          
-helpers/
-├── helper_google_popup_decline.py   
-└── helper_captcha_skip.py           
+## Project Structure
+
+```
+.
+├── conftest.py
+├── tests/
+│   ├── test_alza.py
+│   ├── test_ikea.py
+│   └── test_jysk.py
+├── pages/
+│   ├── __init__.py
+│   ├── alza_page.py
+│   ├── ikea_page.py
+│   └── jysk_page.py
+└── helpers/
+    ├── __init__.py
+    ├── helper_google_popup_decline.py
+    └── helper_captcha_skip.py
+```         
 
 ## Prerequisites
 
