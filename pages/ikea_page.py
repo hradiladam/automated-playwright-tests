@@ -1,4 +1,4 @@
-# ikea_page
+# pages/ikea_page.py
 from playwright.sync_api import Page, expect
 
 class IkeaPage:
@@ -34,7 +34,6 @@ class IkeaPage:
 
         # Wait for the English site to load
         self.page.wait_for_load_state("load")
-        expect(self.page).to_have_url("https://www.ikea.com/cz/en/")
         print("DEBUG: Switched to English site")
     
     # --- Choose store by postal code ---
@@ -53,14 +52,16 @@ class IkeaPage:
     def get_first_store(self):
         return self.page.locator("div.hnf-store-picker__storelist > ul > li > div").first
     
-    # Wait for and verify the first (nearest) store has the expected ID attribute
-    def verify_store(self, store_div, expected_id: str, expected_text: str):
+    # Wait until the given store element has the expected ID attribute
+    # This confirms that the correct store item has been rendered based on search results
+    def wait_for_store_id(self, store_div, expected_id: str):
         expect(store_div).to_have_attribute("id", expected_id, timeout=10000)
         print(f"DEBUG: Store ID matches: {expected_id}")
 
-        title = store_div.locator("button > span > span > span.hnf-choice-item__title")
-        expect(title).to_have_text(expected_text, timeout=5000)
-        print(f"DEBUG: Store name matches: {expected_text}")
+    # Return the locator for the store's title element inside a store card
+    # Used in the test to check that the correct store name is shown to the user
+    def get_store_title(self, store_div):
+        return store_div.locator("button > span > span > span.hnf-choice-item__title")
     
     # Click on the first store
     def select_store(self, store_div):
@@ -69,8 +70,7 @@ class IkeaPage:
         print("DEBUG: Clicked store button")
 
     # Check that the selected store name appears in the header
-    def verify_selected_store(self, expected_text: str):
-        selected = self.page.locator("#hnf-header-storepicker > a > span.hnf-utilities__value")
-        selected.wait_for(state="visible", timeout=10000)
-        expect(selected).to_have_text(expected_text, timeout=10000)
-        print(f"DEBUG: Verified selected store name in header: '{expected_text}'")
+    def get_selected_store_text(self):
+        locator = self.page.locator("#hnf-header-storepicker > a > span.hnf-utilities__value")
+        locator.wait_for(state="visible", timeout=10000)
+        return locator
