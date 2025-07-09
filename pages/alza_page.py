@@ -1,4 +1,4 @@
-# alza_page
+# pages/alza_page.py
 
 from playwright.sync_api import Page, expect, TimeoutError
 from helpers.helper_google_popup_decline import dismiss_google_popup_if_present
@@ -38,12 +38,12 @@ class AlzaPage:
         print("DEBUG: Selected English language")
         
         self.page.wait_for_load_state("load")
-        expect(self.page).to_have_url("https://www.alza.cz/EN/?setlang=en-GB")
-        print("DEBUG: English site loaded with correct URL")
+
+    def get_current_url(self):
+        return self.page.url        
     
     # --- Search for item and add it to cart---
     def search_and_add_to_cart(self, item:str):
-
         searchbox = self.page.get_by_role("combobox", name="What are you looking for? E.g")
         searchbox_btn = self.page.get_by_test_id("button-search")
 
@@ -59,22 +59,20 @@ class AlzaPage:
 
         dismiss_google_popup_if_present(self.page) # Remove google account sign-in popup
 
+    # Return the locator for the cart icon button in the header
+    def get_basket_button(self):
+        return self.page.get_by_title("Go to Shopping Cart")
+
     # Check that item was added to cart, go to the cart and check that order page opens
     def go_to_cart(self):
-        basket_btn = self.page.get_by_title("Go to Shopping Cart")
-        expect(basket_btn).to_contain_text("1")
-
-        dismiss_google_popup_if_present(self.page) # Remove google account sign-in popup
-
-        basket_btn.click()
-        expect(self.page).to_have_url("https://www.alza.cz/Order1.htm")
-
-        dismiss_google_popup_if_present(self.page) # Remove google account sign-in popup
+        dismiss_google_popup_if_present(self.page)
+        self.get_basket_button().click()
+        dismiss_google_popup_if_present(self.page)
     
      # Progress to payment and delviery page
     def proceed_to_payment_and_delivery(self):
         continue_btn = self.page.get_by_role("link", name="Continue", exact=True)
-        continue_btn.wait_for(state="visible")  # Wait until visible
+        continue_btn.wait_for(state="visible")
         continue_btn.click()
 
         dismiss_google_popup_if_present(self.page)
@@ -95,19 +93,17 @@ class AlzaPage:
         
         dismiss_google_popup_if_present(self.page)
     
-    # Check that Alza Plus offer is visible on payment and delviery page and includes both 1-year-membership and monthly subsciption
-    def check_alza_plus_offers(self):
-        alza_plus_banner = self.page.get_by_text("FREE shipping on everything with AlzaPlus+Activate AlzaPlus+ and get FREE")
-        expect(alza_plus_banner).to_be_visible()
-        print("DEBUG: Alza Plus banner is visible")
+    # Return the locator for the Alza Plus banner on the payment & delivery page
+    def get_alza_plus_banner(self):
+        return self.page.get_by_text("FREE shipping on everything with AlzaPlus+Activate AlzaPlus+ and get FREE")
+    
+    # Return the locator for the 1-year Alza Plus membership subscription option
+    def get_alza_plus_one_year_option(self):
+        return self.page.get_by_test_id("apSubsType1")
 
-        one_year_membership = self.page.get_by_test_id("apSubsType1")
-        expect(one_year_membership).to_be_visible()
-        print("DEBUG: 1-year membership option is available")
-
-        monthly_subscription = self.page.get_by_test_id("apSubsType2")
-        expect(monthly_subscription).to_be_visible()
-        print("DEBUG: Monthly subscription is available")
+    # Return the locator for the monthly Alza Plus subscription option
+    def get_alza_plus_monthly_option(self):
+        return self.page.get_by_test_id("apSubsType2")
 
     # Cleanup of the cart
     def empty_cart(self):
@@ -125,8 +121,3 @@ class AlzaPage:
         confirm_button = self.page.get_by_role("button", name="Empty cart")
         confirm_button.wait_for(state="visible", timeout=5000)
         confirm_button.click()
-    
-
-    
-
-    
