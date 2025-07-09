@@ -1,4 +1,4 @@
-# jysk_page
+# pages/jysk_page.py
 
 from playwright.sync_api import Page, expect
 
@@ -33,9 +33,11 @@ class JyskPage:
         
         show_all_btn = self.page.get_by_role("link", name="Zobrazit vše")
         show_all_btn.click()
-
-        expect(self.page).to_have_url("https://jysk.cz/loznice/matrace")
         print("DEBUG: Page with mattrasses has been loaded")
+
+    # Get the current URL
+    def get_current_url(self):
+        return self.page.url
     
     # Choosing quality
     def choosing_quality(self, quality):
@@ -57,37 +59,34 @@ class JyskPage:
 
     # Display results
     def display_results(self):
-        diplay_results_btn = self.page.get_by_role("button", name="Zobrazit výsledky vyhledávání:")
-        diplay_results_btn.click()
+        display_results_btn = self.page.get_by_role("button", name="Zobrazit výsledky vyhledávání:")
+        display_results_btn.click()
         print("DEBUG: Results selected")
     
-    # Check that filters are registered
-    def check_filters(self, quality):
-        selected_filters = self.page.locator("div.w3-pills-container").nth(0)
-        expect(selected_filters).to_contain_text(quality)
-        print("DEBUG: Selected filters have been registered correctly")
+    # Return the locator for the selected filters pill container
+    # Used to verify that the applied filter (e.g. quality) is visible on the UI 
+    def get_selected_filters(self):
+        return self.page.locator("div.w3-pills-container").nth(0)
     
-    # Scroll to the bottom to ensure all products are loaded (lazy loading)
+    # Scroll to the bottom of the page to trigger lazy loading of more products
     def scroll_down(self):
         self.page.mouse.wheel(0, 15000)
-        self.page.wait_for_timeout(10000)  # Give time for lazy content to load/render
-    
-    # Count visible mattresses displayed on page after using "quality" in the filter
-    # &
-    # Individually check each visible product's sticker text matches quality (case-insensitive)
-    def count_visible_mattrases(self, quality):
-        product_locator = self.page.locator("div.product-teaser-body")
-        total_products = product_locator.count()
-        visible_count = sum(product_locator.nth(i).is_visible() for i in range(total_products))
-        print(f"DEBUG: There are {visible_count} displayed mattresses after applying the quality filter: {quality}")
+        self.page.wait_for_timeout(10000)  # Lazy load wait
 
-        for i in range(total_products):
+    # Return a list of all mattress product elements currently visible on the page
+    def get_visible_mattress_products(self):
+        product_locator = self.page.locator("div.product-teaser-body")
+        total = product_locator.count()
+        visible_products = []
+
+        for i in range(total):
             product = product_locator.nth(i)
             if product.is_visible():
-                sticker = product.locator("span.sticker-text")
-                sticker_text = sticker.text_content()
-                # Only check if sticker text is not empty
-                if sticker_text:
-                    expect(sticker).to_have_text(quality, ignore_case=True)
+                visible_products.append(product)
 
-        print(f"DEBUG: All displayed products' quality stickers match selected quality of: {quality}")
+        return visible_products
+
+    # Extract the text from the quality sticker of a single visible product
+    def get_sticker_text(self, product):
+        sticker = product.locator("span.sticker-text")
+        return sticker.text_content() or ""
